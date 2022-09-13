@@ -1,5 +1,9 @@
 // create TCP client, sourced: https://www.linode.com/docs/guides/developing-udp-and-tcp-clients-and-servers-in-go/
 
+// instructions:
+// 1) run server main function with port number, e.g. go run tcpS.go 1234
+// 2) run client main function in another terminal with port address, e.g. go run tcpC.go 127.0.0.1:1234
+
 package main
 
 import (
