@@ -42,12 +42,20 @@ func main() {
 		fmt.Println("err")
 	}
 	scanner := bufio.NewScanner(strings.NewReader(x))
+
+	//making map for the id and port ... skip first is used so we do not add the min max to map
+	skip_first := false
+	id_map := make(map[string]string)
 	for scanner.Scan() {
 		line := scanner.Text()
 		id := strings.Split(line, " ")
-		fmt.Println(id[0])
+		if skip_first {
+			id_map[id[0]] = id[2]
+		}
+		skip_first = true
 		//fmt.Println(scanner.Text())
 	}
+	fmt.Println(id_map)
 	//this is for reading user input sourced from linode tutorial
 	//format of the user input would be "send 2 message", in this scenario process 2 would be sent a message
 	for {
