@@ -58,10 +58,21 @@ func main() {
 		fmt.Println(text)
 
 		splitted := strings.Split(text, " ")
+		if splitted[0] != "send" {
+			fmt.Println("Error in command line...", splitted[0], "is not a valid command")
+			continue
+		}
+		if len(splitted) < 3 {
+			fmt.Println("Not enough arguements, please write as 'send ID message'")
+			continue
+		}
 		process_destination := splitted[1]
-		message := splitted[2:]
+		message := strings.Join(splitted[2:], "")
 		fmt.Println(process_destination)
 		fmt.Println(message)
+
+		//function call to unicast send would be in here I believe
+		//unicast_send(process_destination, message)
 
 		// message, _ := bufio.NewReader(c).ReadString('\n')
 		// fmt.Print("->: " + message)
