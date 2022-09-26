@@ -89,7 +89,7 @@ func main() {
 			fmt.Println("Not enough arguements, please write as 'send ID message'")
 			continue
 		}
-		process_destination := splitted[1]
+		process_destination := id_map[splitted[1]]
 		message := strings.Join(splitted[2:], "")
 		fmt.Println(process_destination)
 		fmt.Println(message)
