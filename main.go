@@ -1,5 +1,7 @@
 package main
 
+// INSTRUCTIONS: type 'go run *.go PORT_NUM'
+
 import (
 	"bufio"
 	"fmt"
@@ -26,13 +28,19 @@ func unicast_recieve(source string, message string) {
 }
 */
 func main() {
+	arguments := os.Args //arguments[1] = port number
+	if len(arguments) == 1 {
+		fmt.Println("Please provide port number")
+		return
+	}
+
 	//we kept this if we need to run commands in terminal from within main
 	cmnd := exec.Command("main.exe", "arg")
 	//cmnd.Run() // and wait
 	cmnd.Start()
 
 	//this bottom piece takes a config file and reads it ... not sure if relative path works but can probably find a way to generalize it
-	Dat, err := os.ReadFile("/Users/keith/DS/goScrap/config.txt")
+	Dat, err := os.ReadFile("/Users/alansikarov/Documents/GitHub/SimulateTCP/config.txt")
 	x := string(Dat)
 	fmt.Println(string(Dat))
 	if err != nil {
@@ -53,37 +61,48 @@ func main() {
 		//fmt.Println(scanner.Text())
 	}
 	fmt.Println(id_map)
-	//this is for reading user input sourced from linode tutorial
-	//format of the user input would be "send 2 message", in this scenario process 2 would be sent a message
-	for {
-		reader := bufio.NewReader(os.Stdin)
-		fmt.Print(">> ")
-		text, _ := reader.ReadString('\n')
 
-		fmt.Println(text)
+	// creating servers and clients in a clique, O(n^2)
+	serverArgs := []string{id_map[arguments[1]]}
+	clientArgs := []string{"127.0.0.1:" + id_map[arguments[1]]}
+	fmt.Println(serverArgs)
+	fmt.Println(clientArgs)
+	go serverSetup(serverArgs)
+	clientSetup(clientArgs)
+	/*
+		//this is for reading user input sourced from linode tutorial
+		//format of the user input would be "send 2 message", in this scenario process 2 would be sent a message
+		for {
+			reader := bufio.NewReader(os.Stdin)
+			fmt.Print(">> ")
+			text, _ := reader.ReadString('\n')
 
-		splitted := strings.Split(text, " ")
-		if splitted[0] != "send" {
-			fmt.Println("Error in command line...", splitted[0], "is not a valid command")
-			continue
+			fmt.Println(text)
+
+			splitted := strings.Split(text, " ")
+			if splitted[0] != "send" {
+				fmt.Println("Error in command line...", splitted[0], "is not a valid command")
+				continue
+			}
+			if len(splitted) < 3 {
+				fmt.Println("Not enough arguements, please write as 'send ID message'")
+				continue
+			}
+			process_destination := splitted[1]
+			message := strings.Join(splitted[2:], "")
+			fmt.Println(process_destination)
+			fmt.Println(message)
+
+			//function call to unicast send would be in here I believe
+			//unicast_send(process_destination, message)
+
+			// message, _ := bufio.NewReader(c).ReadString('\n')
+			// fmt.Print("->: " + message)
+			// if strings.TrimSpace(string(text)) == "STOP" {
+			// 	fmt.Println("TCP client exiting...")
+			// 	return
+			// }
 		}
-		if len(splitted) < 3 {
-			fmt.Println("Not enough arguements, please write as 'send ID message'")
-			continue
-		}
-		process_destination := splitted[1]
-		message := strings.Join(splitted[2:], "")
-		fmt.Println(process_destination)
-		fmt.Println(message)
+	*/
 
-		//function call to unicast send would be in here I believe
-		//unicast_send(process_destination, message)
-
-		// message, _ := bufio.NewReader(c).ReadString('\n')
-		// fmt.Print("->: " + message)
-		// if strings.TrimSpace(string(text)) == "STOP" {
-		// 	fmt.Println("TCP client exiting...")
-		// 	return
-		// }
-	}
 }
