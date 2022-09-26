@@ -41,7 +41,7 @@ func main() {
 	//cmnd.Run() // and wait
 	cmnd.Start()
 
-	//this bottom piece takes a config file and reads it ... not sure if relative path works but can probably find a way to generalize it
+	//this bottom piece takes a config file and reads it
 	Dat, err := os.ReadFile("config.txt")
 	x := string(Dat)
 	fmt.Println(string(Dat))
@@ -68,7 +68,7 @@ func main() {
 	if arguments[2] == "s" {
 		serverArgs := []string{id_map[arguments[1]]}
 		fmt.Println(serverArgs)
-		serverSetup(serverArgs)
+		serverSetup1(serverArgs)
 
 	}
 	if arguments[2] == "c" {

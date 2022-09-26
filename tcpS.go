@@ -29,7 +29,6 @@ func serverSetup(arguments []string) {
 		return
 	}
 	defer l.Close()
-
 	c, err := l.Accept()
 	if err != nil {
 		fmt.Println(err)
