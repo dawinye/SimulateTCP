@@ -5,26 +5,32 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"net"
 	"os"
 	"strings"
 )
 
 // This one would call the tcpC file and run it
-/*
+
 func unicast_send(destination string, message string) {
-	connection, err := net.Dial("tcp", destination)
+	CONNECT := destination
+	fmt.Println(CONNECT)
+	c, err := net.Dial("tcp", CONNECT)
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
+	fmt.Fprintf(c, message+"\n")
 }
-func unicast_recieve(source string, message string) {
-	listener, err := net.Listen("tcp", source)
-	if err != nil {
-		fmt.Println(err)
-		return
+
+/*
+	func unicast_recieve(source string, message string) {
+		listener, err := net.Listen("tcp", source)
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
 	}
-}
 */
 func main() {
 	//arguments[1] = port number and [2] is whether it will be server or client
@@ -83,14 +89,12 @@ func main() {
 				continue
 			}
 			process_destination := id_map[splitted[1]]
-			message := strings.Join(splitted[2:], " ") + " SENDER: " + arguments[1]
+			// arguments[1] is the sender port id
+			message := strings.Join(splitted[2:], " ") + " sent from " + arguments[1]
 			fmt.Println(process_destination)
 			fmt.Println(message)
 			process := "127.0.0.1:" + process_destination
-			clientSetup(process, message) // arguments[1] is the sender port id
-
-			//function call to unicast send would be in here I believe
-			//unicast_send(process_destination, message)
+			unicast_send(process, message)
 
 			// message, _ := bufio.NewReader(c).ReadString('\n')
 			// fmt.Print("->: " + message)
