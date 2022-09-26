@@ -65,46 +65,40 @@ func main() {
 		serverSetup1(serverArgs)
 
 	}
-	// if arguments[2] == "c" {
-	// 	clientArgs := []string{"127.0.0.1:" + id_map[arguments[1]]}
-	// 	fmt.Println(clientArgs)
-	// 	//clientSetup(clientArgs)
-	// }
-	// go serverSetup(serverArgs)
-	// clientSetup(clientArgs)
+	if len(arguments) >= 2 && arguments[2] == "c" {
+		//this is for reading user input sourced from linode tutorial
+		//format of the user input would be "send 2 message", in this scenario process 2 would be sent a message
+		for {
+			reader := bufio.NewReader(os.Stdin)
+			fmt.Print(">> ")
+			text, _ := reader.ReadString('\n')
 
-	//this is for reading user input sourced from linode tutorial
-	//format of the user input would be "send 2 message", in this scenario process 2 would be sent a message
-	for {
-		reader := bufio.NewReader(os.Stdin)
-		fmt.Print(">> ")
-		text, _ := reader.ReadString('\n')
+			splitted := strings.Split(text[:len(text)-1], " ")
+			if splitted[0] != "send" {
+				fmt.Println("Error in command line...", splitted[0], "is not a valid command")
+				continue
+			}
+			if len(splitted) < 3 {
+				fmt.Println("Not enough arguements, please write as 'send ID message'")
+				continue
+			}
+			process_destination := id_map[splitted[1]]
+			message := strings.Join(splitted[2:], " ") + " SENDER: " + arguments[1]
+			fmt.Println(process_destination)
+			fmt.Println(message)
+			process := "127.0.0.1:" + process_destination
+			clientSetup(process, message) // arguments[1] is the sender port id
 
-		splitted := strings.Split(text, " ")
-		if splitted[0] != "send" {
-			fmt.Println("Error in command line...", splitted[0], "is not a valid command")
-			continue
+			//function call to unicast send would be in here I believe
+			//unicast_send(process_destination, message)
+
+			// message, _ := bufio.NewReader(c).ReadString('\n')
+			// fmt.Print("->: " + message)
+			// if strings.TrimSpace(string(text)) == "STOP" {
+			// 	fmt.Println("TCP client exiting...")
+			// 	return
+			// }
 		}
-		if len(splitted) < 3 {
-			fmt.Println("Not enough arguements, please write as 'send ID message'")
-			continue
-		}
-		process_destination := id_map[splitted[1]]
-		message := strings.Join(splitted[2:], "")
-		fmt.Println(process_destination)
-		fmt.Println(message)
-		process := "127.0.0.1:" + process_destination
-		clientSetup(process, message)
-
-		//function call to unicast send would be in here I believe
-		//unicast_send(process_destination, message)
-
-		// message, _ := bufio.NewReader(c).ReadString('\n')
-		// fmt.Print("->: " + message)
-		// if strings.TrimSpace(string(text)) == "STOP" {
-		// 	fmt.Println("TCP client exiting...")
-		// 	return
-		// }
 	}
 
 }
