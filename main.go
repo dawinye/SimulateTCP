@@ -28,9 +28,11 @@ func unicast_recieve(source string, message string) {
 }
 */
 func main() {
-	arguments := os.Args //arguments[1] = port number
-	if len(arguments) == 1 {
-		fmt.Println("Please provide port number")
+	//arguments[1] = port number and [2] is whether it will be server or client
+	arguments := os.Args
+	if len(arguments) == 2 {
+		fmt.Println("Please provide port number, and whether this will be a server or client")
+		fmt.Println("Please do in the format: process number (s or c)")
 		return
 	}
 
@@ -40,7 +42,7 @@ func main() {
 	cmnd.Start()
 
 	//this bottom piece takes a config file and reads it ... not sure if relative path works but can probably find a way to generalize it
-	Dat, err := os.ReadFile("/Users/alansikarov/Documents/GitHub/SimulateTCP/config.txt")
+	Dat, err := os.ReadFile("config.txt")
 	x := string(Dat)
 	fmt.Println(string(Dat))
 	if err != nil {
@@ -62,13 +64,20 @@ func main() {
 	}
 	fmt.Println(id_map)
 
-	// creating servers and clients in a clique, O(n^2)
+	//creating servers and clients in a clique, O(n^2)
 	serverArgs := []string{id_map[arguments[1]]}
 	clientArgs := []string{"127.0.0.1:" + id_map[arguments[1]]}
 	fmt.Println(serverArgs)
 	fmt.Println(clientArgs)
-	go serverSetup(serverArgs)
-	clientSetup(clientArgs)
+	if arguments[2] == "s" {
+		serverSetup(id_map[1])
+
+	}
+	if arguments[2] == "c" {
+		clientSetup("127.0.0.1:" + id_map[arguments[1]])
+	}
+	// go serverSetup(serverArgs)
+	// clientSetup(clientArgs)
 	/*
 		//this is for reading user input sourced from linode tutorial
 		//format of the user input would be "send 2 message", in this scenario process 2 would be sent a message
