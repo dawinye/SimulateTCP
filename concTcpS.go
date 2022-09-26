@@ -11,7 +11,6 @@ import (
 var count = 0
 
 func handleConnection(c net.Conn) {
-	fmt.Print(".")
 	for {
 		netData, err := bufio.NewReader(c).ReadString('\n')
 		if err != nil {
@@ -21,6 +20,7 @@ func handleConnection(c net.Conn) {
 
 		temp := strings.TrimSpace(string(netData))
 		if temp == "STOP" {
+			fmt.Println("debug: break from server")
 			break
 		}
 		fmt.Println(temp)
