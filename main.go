@@ -65,16 +65,16 @@ func main() {
 	fmt.Println(id_map)
 
 	//creating servers and clients in a clique, O(n^2)
-	serverArgs := []string{id_map[arguments[1]]}
-	clientArgs := []string{"127.0.0.1:" + id_map[arguments[1]]}
-	fmt.Println(serverArgs)
-	fmt.Println(clientArgs)
 	if arguments[2] == "s" {
-		serverSetup(id_map[1])
+		serverArgs := []string{id_map[arguments[1]]}
+		fmt.Println(serverArgs)
+		serverSetup(serverArgs)
 
 	}
 	if arguments[2] == "c" {
-		clientSetup("127.0.0.1:" + id_map[arguments[1]])
+		clientArgs := []string{"127.0.0.1:" + id_map[arguments[1]]}
+		fmt.Println(clientArgs)
+		clientSetup(clientArgs)
 	}
 	// go serverSetup(serverArgs)
 	// clientSetup(clientArgs)
