@@ -5,12 +5,23 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"math/rand"
 	"net"
 	"os"
 	"strings"
+	"time"
 )
 
-// This one would call the tcpC file and run it
+func simulateDelay(minDelay int, maxDelay int, ch chan<- string) {
+	rand.Seed(time.Now().UnixNano())
+	delay := float64(rand.Intn(maxDelay-minDelay)+minDelay) / float64(1000)
+	i := 0
+	for start := time.Now(); time.Since(start) <= time.Duration(delay*float64(time.Second)); {
+		i++
+	}
+	ch <- "hello"
+	close(ch)
+}
 
 func unicast_send(destination string, message string) {
 	CONNECT := destination
@@ -20,6 +31,10 @@ func unicast_send(destination string, message string) {
 		fmt.Println(err)
 		return
 	}
+	channel := make(chan string)
+	go simulateDelay(100, 10000, channel)
+	message = <-channel
+
 	fmt.Fprintf(c, message+"\n")
 }
 
