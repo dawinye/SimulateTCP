@@ -8,58 +8,16 @@ import (
 	"math/rand"
 	"net"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 )
 
-func simulateDelay(minDelay int, maxDelay int, ch chan<- string) {
-	rand.Seed(time.Now().UnixNano())
-	delay := float64(rand.Intn(maxDelay-minDelay)+minDelay) / float64(1000)
-	i := 0
-	for start := time.Now(); time.Since(start) <= time.Duration(delay*float64(time.Second)); {
-		i++
-	}
-	ch <- "hello"
-	close(ch)
-}
-
-func unicast_send(destination string, message string) {
-	CONNECT := destination
-	fmt.Println(CONNECT)
-	c, err := net.Dial("tcp", CONNECT)
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-	channel := make(chan string)
-	go simulateDelay(100, 10000, channel)
-	message = <-channel
-
-	fmt.Fprintf(c, message+"\n")
-}
-
-/*
-	func unicast_recieve(source string, message string) {
-		listener, err := net.Listen("tcp", source)
-		if err != nil {
-			fmt.Println(err)
-			return
-		}
-	}
-*/
-func main() {
-	//arguments[1] = port number and [2] is whether it will be server or client
-	arguments := os.Args
-	// if len(arguments) == 2 {
-	// 	fmt.Println("Please provide port number, and whether this will be a server or client")
-	// 	fmt.Println("Please do in the format: process number (s or c)")
-	// 	return
-	// }
-
-	//this bottom piece takes a config file and reads it
+func read_config() (int, int, map[string]string) {
+	min_delay := 0
+	max_delay := 0
 	Dat, err := os.ReadFile("config.txt")
 	x := string(Dat)
-	fmt.Println(string(Dat))
 	if err != nil {
 		fmt.Println("err")
 	}
@@ -73,20 +31,61 @@ func main() {
 		id := strings.Split(line, " ")
 		if skip_first {
 			id_map[id[0]] = id[2]
+			continue
 		}
+		min_delay, err = strconv.Atoi(id[0])
+		max_delay, err = strconv.Atoi(id[1])
 		skip_first = true
-		//fmt.Println(scanner.Text())
 	}
-	fmt.Println(id_map)
+	return min_delay, max_delay, id_map
+}
+func simulateDelay(minDelay int, maxDelay int, ch chan<- string) {
+	rand.Seed(time.Now().UnixNano())
+	delay := float64(rand.Intn(maxDelay-minDelay)+minDelay) / float64(1000)
+	i := 0
+	for start := time.Now(); time.Since(start) <= time.Duration(delay*float64(time.Second)); {
+		i++
+	}
+	ch <- "hello"
+	close(ch)
+}
+
+func unicast_send(destination string, message string) {
+	CONNECT := destination
+	//fmt.Println(CONNECT)
+	c, err := net.Dial("tcp", CONNECT)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	min, max, _ := read_config()
+	channel := make(chan string)
+	go simulateDelay(min, max, channel)
+	_ = <-channel
+
+	fmt.Fprintf(c, message+"\n")
+}
+
+func unicast_recieve(source string, message string) string {
+	new_message := message + " received from " + source
+	return new_message
+}
+
+func main() {
+	//arguments[1] = port number and [2] is whether it will be server or client
+	arguments := os.Args
+	_, _, id_map := read_config()
+	currentTime := time.Now()
+	currentTime.Format("2006-01-02 15:04:05.0000")
 
 	//creating servers and clients in a clique, O(n^2)
 	if len(arguments) >= 2 && arguments[2] == "s" {
 		serverArgs := []string{id_map[arguments[1]]}
-		fmt.Println(serverArgs)
 		serverSetup1(serverArgs)
 
 	}
 	if len(arguments) >= 2 && arguments[2] == "c" {
+		sender_id := arguments[1]
 		//this is for reading user input sourced from linode tutorial
 		//format of the user input would be "send 2 message", in this scenario process 2 would be sent a message
 		for {
@@ -105,11 +104,13 @@ func main() {
 			}
 			process_destination := id_map[splitted[1]]
 			// arguments[1] is the sender port id
-			message := strings.Join(splitted[2:], " ") + " sent from " + arguments[1]
-			fmt.Println(process_destination)
-			fmt.Println(message)
+			raw_message := strings.Join(splitted[2:], " ")
+			message_to_send := "Received \"" + raw_message + "\" from process " + sender_id + ", system time is "
 			process := "127.0.0.1:" + process_destination
-			unicast_send(process, message)
+			currentTime = time.Now()
+			unicast_send(process, message_to_send)
+
+			fmt.Println("Sent " + raw_message + " from process " + sender_id + ", system time is " + currentTime.Format("2006-01-02 15:04:05.0000"))
 
 			// message, _ := bufio.NewReader(c).ReadString('\n')
 			// fmt.Print("->: " + message)

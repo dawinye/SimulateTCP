@@ -6,6 +6,7 @@ import (
 	"net"
 	"strconv"
 	"strings"
+	"time"
 )
 
 var count = 0
@@ -23,7 +24,8 @@ func handleConnection(c net.Conn) {
 			fmt.Println("debug: break from server")
 			break
 		}
-		fmt.Println(temp)
+		currentTime := time.Now()
+		fmt.Println(temp + "_" + currentTime.Format("2006-01-02 15:04:05.0000"))
 		counter := strconv.Itoa(count) + "\n"
 		c.Write([]byte(string(counter)))
 	}
