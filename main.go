@@ -1,6 +1,5 @@
+// INSTRUCTIONS: type 'go run *.go [process_id] [s or c]'
 package main
-
-// INSTRUCTIONS: type 'go run *.go PORT_NUM'
 
 import (
 	"bufio"
@@ -39,6 +38,7 @@ func read_config() (int, int, map[string]string) {
 	}
 	return min_delay, max_delay, id_map
 }
+
 func simulateDelay(minDelay int, maxDelay int, ch chan<- string) {
 	rand.Seed(time.Now().UnixNano())
 	delay := float64(rand.Intn(maxDelay-minDelay)+minDelay) / float64(1000)
@@ -50,7 +50,6 @@ func simulateDelay(minDelay int, maxDelay int, ch chan<- string) {
 
 func unicast_send(destination string, message string) {
 	CONNECT := destination
-	//fmt.Println(CONNECT)
 	c, err := net.Dial("tcp", CONNECT)
 	if err != nil {
 		fmt.Println(err)
@@ -117,8 +116,8 @@ func main() {
 			// message, _ := bufio.NewReader(c).ReadString('\n')
 			// fmt.Print("->: " + message)
 			// if strings.TrimSpace(string(text)) == "STOP" {
-			// 	fmt.Println("TCP client exiting...")
-			// 	return
+			//  fmt.Println("TCP client exiting...")
+			//  return
 			// }
 		}
 	}
