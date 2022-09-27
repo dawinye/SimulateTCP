@@ -25,7 +25,7 @@ func handleConnection(c net.Conn) {
 			break
 		}
 		currentTime := time.Now()
-		fmt.Println(temp + "_" + currentTime.Format("2006-01-02 15:04:05.0000"))
+		fmt.Println(temp + " " + currentTime.Format("2006-01-02 15:04:05.0000"))
 		counter := strconv.Itoa(count) + "\n"
 		c.Write([]byte(string(counter)))
 	}
