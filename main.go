@@ -60,10 +60,10 @@ func unicast_send(destination string, message string) {
 	}
 	min, max, _ := read_config()
 	channel := make(chan string)
+
 	// blocking unicast_send with the filler_string
 	go simulateDelay(min, max, channel)
 	_ = <-channel
-
 	fmt.Fprintf(c, message+"\n")
 }
 
