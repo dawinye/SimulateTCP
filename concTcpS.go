@@ -1,3 +1,5 @@
+// sourced from Linodes tutorial on creating a tcp server
+// link: https://www.linode.com/docs/guides/developing-udp-and-tcp-clients-and-servers-in-go/
 package main
 
 import (
@@ -32,8 +34,7 @@ func handleConnection(c net.Conn) {
 	c.Close()
 }
 
-func serverSetup1(arguments []string) {
-	//arguments := os.Args
+func serverSetup(arguments []string) {
 	if len(arguments) != 1 {
 		fmt.Println("Please provide a port number!")
 		return
