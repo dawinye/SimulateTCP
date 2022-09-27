@@ -1,40 +1,23 @@
+// INSTRUCTIONS: type 'go run *.go [process_id] [s or c]'
 package main
 
 import (
 	"bufio"
 	"fmt"
+	"math/rand"
+	"net"
 	"os"
-	"os/exec"
+	"strconv"
 	"strings"
+	"time"
 )
 
-// This one would call the tcpC file and run it
-/*
-func unicast_send(destination string, message string) {
-	connection, err := net.Dial("tcp", destination)
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-}
-func unicast_recieve(source string, message string) {
-	listener, err := net.Listen("tcp", source)
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-}
-*/
-func main() {
-	//we kept this if we need to run commands in terminal from within main
-	cmnd := exec.Command("main.exe", "arg")
-	//cmnd.Run() // and wait
-	cmnd.Start()
-
-	//this bottom piece takes a config file and reads it ... not sure if relative path works but can probably find a way to generalize it
-	Dat, err := os.ReadFile("/Users/keith/DS/goScrap/config.txt")
+// reads the config file, returns min, max delay and map of the process ids and their respective ports
+func read_config() (int, int, map[string]string) {
+	min_delay := 0
+	max_delay := 0
+	Dat, err := os.ReadFile("config.txt")
 	x := string(Dat)
-	fmt.Println(string(Dat))
 	if err != nil {
 		fmt.Println("err")
 	}
@@ -48,42 +31,95 @@ func main() {
 		id := strings.Split(line, " ")
 		if skip_first {
 			id_map[id[0]] = id[2]
+			continue
 		}
+		min_delay, err = strconv.Atoi(id[0])
+		max_delay, err = strconv.Atoi(id[1])
 		skip_first = true
-		//fmt.Println(scanner.Text())
 	}
-	fmt.Println(id_map)
-	//this is for reading user input sourced from linode tutorial
-	//format of the user input would be "send 2 message", in this scenario process 2 would be sent a message
-	for {
-		reader := bufio.NewReader(os.Stdin)
-		fmt.Print(">> ")
-		text, _ := reader.ReadString('\n')
+	return min_delay, max_delay, id_map
+}
 
-		fmt.Println(text)
+// delays and fills channel with filler_string
+func simulateDelay(minDelay int, maxDelay int, ch chan<- string) {
+	rand.Seed(time.Now().UnixNano())
+	delay := float64(rand.Intn(maxDelay-minDelay)+minDelay) / float64(1000)
+	for start := time.Now(); time.Since(start) <= time.Duration(delay*float64(time.Second)); {
+	}
+	ch <- "filler_string"
+	close(ch)
+}
 
-		splitted := strings.Split(text, " ")
-		if splitted[0] != "send" {
-			fmt.Println("Error in command line...", splitted[0], "is not a valid command")
-			continue
+// client dials into server to relay message with simulated delay
+func unicast_send(destination string, message string) {
+	CONNECT := destination
+	c, err := net.Dial("tcp", CONNECT)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	min, max, _ := read_config()
+	channel := make(chan string)
+	// blocking unicast_send with the filler_string
+	go simulateDelay(min, max, channel)
+	_ = <-channel
+
+	fmt.Fprintf(c, message+"\n")
+}
+
+func main() {
+	// arguments[1] = port number and [2] is whether it will be server or client
+	arguments := os.Args
+	_, _, id_map := read_config()
+
+	// initialized time variable to be overwritten
+	currentTime := time.Now()
+
+	// error checking and control flow
+	if _, id_valid := id_map[arguments[1]]; !id_valid || len(arguments) < 2 || !(arguments[2] == "s" || arguments[2] == "c") {
+		fmt.Println("Please format in \"go run *.go [process_id] [c or s]\". Make sure the ID is valid")
+		return
+	}
+
+	// creating servers and clients in a clique, O(n^2)
+	if arguments[2] == "s" {
+		serverArgs := []string{id_map[arguments[1]]}
+		serverSetup(serverArgs)
+	}
+
+	if arguments[2] == "c" {
+		sender_id := arguments[1]
+
+		// this is for reading user input sourced from linode tutorial
+		// format of the user input would be "send 2 message", in this scenario process 2 would be sent a message
+		for {
+			reader := bufio.NewReader(os.Stdin)
+			fmt.Print(">> ")
+			text, _ := reader.ReadString('\n')
+
+			// split up user input for error checking
+			splitted := strings.Split(text[:len(text)-1], " ")
+			if splitted[0] == "STOP" {
+				fmt.Println("TCP client exiting...")
+				return
+			}
+			if splitted[0] != "send" {
+				fmt.Println("Error in command line...", splitted[0], "is not a valid command")
+				continue
+			}
+			if len(splitted) < 3 {
+				fmt.Println("Not enough arguements, please write as 'send ID message'")
+				continue
+			}
+
+			// processing input and messages
+			process_destination := id_map[splitted[1]]
+			raw_message := strings.Join(splitted[2:], " ")
+			message_to_send := "Received \"" + raw_message + "\" from process " + sender_id + ", system time is "
+			process := "127.0.0.1:" + process_destination
+			currentTime = time.Now()
+			unicast_send(process, message_to_send)
+			fmt.Println("Sent " + raw_message + " from process " + sender_id + ", system time is " + currentTime.Format("2006-01-02 15:04:05.0000"))
 		}
-		if len(splitted) < 3 {
-			fmt.Println("Not enough arguements, please write as 'send ID message'")
-			continue
-		}
-		process_destination := splitted[1]
-		message := strings.Join(splitted[2:], "")
-		fmt.Println(process_destination)
-		fmt.Println(message)
-
-		//function call to unicast send would be in here I believe
-		//unicast_send(process_destination, message)
-
-		// message, _ := bufio.NewReader(c).ReadString('\n')
-		// fmt.Print("->: " + message)
-		// if strings.TrimSpace(string(text)) == "STOP" {
-		// 	fmt.Println("TCP client exiting...")
-		// 	return
-		// }
 	}
 }
