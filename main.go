@@ -42,9 +42,7 @@ func read_config() (int, int, map[string]string) {
 func simulateDelay(minDelay int, maxDelay int, ch chan<- string) {
 	rand.Seed(time.Now().UnixNano())
 	delay := float64(rand.Intn(maxDelay-minDelay)+minDelay) / float64(1000)
-	i := 0
 	for start := time.Now(); time.Since(start) <= time.Duration(delay*float64(time.Second)); {
-		i++
 	}
 	ch <- "hello"
 	close(ch)
