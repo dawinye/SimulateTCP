@@ -57,6 +57,7 @@ func unicast_send(destination string, message string) {
 	}
 	min, max, _ := read_config()
 	channel := make(chan string)
+
 	go simulateDelay(min, max, channel)
 	_ = <-channel
 
@@ -95,6 +96,10 @@ func main() {
 			text, _ := reader.ReadString('\n')
 
 			splitted := strings.Split(text[:len(text)-1], " ")
+			if splitted[0] == "STOP" {
+				fmt.Println("TCP client exiting...")
+				return
+			}
 			if splitted[0] != "send" {
 				fmt.Println("Error in command line...", splitted[0], "is not a valid command")
 				continue
@@ -112,13 +117,6 @@ func main() {
 			unicast_send(process, message_to_send)
 
 			fmt.Println("Sent " + raw_message + " from process " + sender_id + ", system time is " + currentTime.Format("2006-01-02 15:04:05.0000"))
-
-			// message, _ := bufio.NewReader(c).ReadString('\n')
-			// fmt.Print("->: " + message)
-			// if strings.TrimSpace(string(text)) == "STOP" {
-			//  fmt.Println("TCP client exiting...")
-			//  return
-			// }
 		}
 	}
 }
