@@ -64,11 +64,6 @@ func unicast_send(destination string, message string) {
 	fmt.Fprintf(c, message+"\n")
 }
 
-func unicast_recieve(source string, message string) string {
-	new_message := message + " received from " + source
-	return new_message
-}
-
 func main() {
 	//arguments[1] = port number and [2] is whether it will be server or client
 	arguments := os.Args
