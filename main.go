@@ -78,13 +78,17 @@ func main() {
 	currentTime := time.Now()
 	currentTime.Format("2006-01-02 15:04:05.0000")
 
+	if _, id_valid := id_map[arguments[1]]; !id_valid || len(arguments) < 2 || !(arguments[2] == "s" || arguments[2] == "c") {
+		fmt.Println("Please format in \"go run *.go [process_id] [c or s]\". Make sure the ID is valid")
+		return
+	}
 	//creating servers and clients in a clique, O(n^2)
-	if len(arguments) >= 2 && arguments[2] == "s" {
+	if arguments[2] == "s" {
 		serverArgs := []string{id_map[arguments[1]]}
 		serverSetup1(serverArgs)
 
 	}
-	if len(arguments) >= 2 && arguments[2] == "c" {
+	if arguments[2] == "c" {
 		sender_id := arguments[1]
 		//this is for reading user input sourced from linode tutorial
 		//format of the user input would be "send 2 message", in this scenario process 2 would be sent a message
@@ -120,5 +124,4 @@ func main() {
 			// }
 		}
 	}
-
 }
