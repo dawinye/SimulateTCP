@@ -6,7 +6,6 @@ To run this simulation, open a new terminal window for every server or group of 
 
 Servers are ran with using 
 ```go run *.go (server number) s``` //There should be 2 spaces
-
 Clients are ran with using 
 ```go run *.go (client number) c``` //There should be 2 spaces
 
